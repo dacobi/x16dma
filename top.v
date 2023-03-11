@@ -80,10 +80,13 @@ module top(
                     5'b00111 : dinc[15:8] <= data;
                     5'b01000 : begin
                             count[7:0] = data;
-                            WAIT <= 1;
-                            TXEN <= 1;                                                                                
+                            if(count > 0) begin
+                                WAIT <= 1;
+                                TXEN <= 1;         
+                            end                                                                       
                         end
-                    5'b01001 : count[15:8] <= data;                
+                    5'b01001 : count[15:8] <= data;
+                    default: TXEN <= 0;         
                 endcase         
             end
             end
