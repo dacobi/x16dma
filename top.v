@@ -11,6 +11,7 @@ module top(
     
     reg TXEN;
     reg WRITE;
+    reg WRITENEXT;
     reg WAIT;
     wire [4:0] regaddr;
     reg [7:0] dbyte;
@@ -25,6 +26,7 @@ module top(
     initial begin
         TXEN = 0;
         WRITE = 0;
+        WRITENEXT = 0;
         WAIT = 1;
     end
         
@@ -33,29 +35,31 @@ module top(
             
         if(TXEN == 1) begin
             if(count > 0) begin
-                if(WRITE) begin
+                if(WRITENEXT) begin
                     if(WAIT) begin
-                        tmpaddr = dadd;
+                        tmpaddr <= dadd;
                         tmpdata <= dbyte;
-                        dadd <= dadd + dinc;
+                        WRITE <= 1;                        
                         WAIT <= 0;
                     end
                     else begin                    
                         count <= count - 1;
+                        dadd <= dadd + dinc;
                         WRITE <= 0;
+                        WRITENEXT <= 0;
                         WAIT <= 1;                               
                     end
                 end
                 else begin
                     if(WAIT) begin
-                        tmpaddr = sadd;
-                        sadd <= sadd + sinc;
+                        tmpaddr <= sadd;                        
                         WAIT <= 0;
                     end
                     else begin
                         dbyte <= data;
+                        sadd <= sadd + sinc;
                         WAIT <= 1;
-                        WRITE <= 1;                                        
+                        WRITENEXT <= 1;                                        
                     end 
                 end
             end 
@@ -81,7 +85,8 @@ module top(
                                 count[7:0] = data;
                                 if(count > 0) begin
                                     WAIT <= 1;
-                                    TXEN <= 1;         
+                                    TXEN <= 1;
+                                    WRITENEXT <= 0;    
                                 end                                                                       
                                 end
                         5'b01001 : count[15:8] <= data;
